@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPR Program Sites</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="PPR_Program_Sites.geojson"></script>
+    <script>
+        const map = L.map('map').setView([39.95, -75.17], 11);
+
+L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoibm9haGdyIiwiYSI6ImNtbGpuZG4wMDAxcWozZ29udnZ3YjMzcHcifQ.tH6RPFW6TkSLf2JBJrEfcQ', {
+    attribution: '© Mapbox © OpenStreetMap',
+    maxZoom: 19,
+    tileSize: 512,
+    zoomOffset: -1
+}).addTo(map);
+
+var style = {
+            radius: 6,
+            fillColor: "#276221",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        } // Define the style for the circle markers as described https://leafletjs.com/examples/geojson/
+
+L.geoJSON(parks, {
+     filter: function(feature) {
+       return feature.properties.park_name === "Frank Glavin Playground"; //create's a filter to only show the feature with a property park_name that is "Frank Glavin Playground" https://leafletjs.com/examples/geojson/
+    },
+    pointToLayer: function(feature, latlng) {
+        return L.circleMarker(latlng, style);// creates circle markers for the points in the GeoJSON layer with the defined style https://leafletjs.com/examples/geojson/
+    },
+    onEachFeature: function(feature, layer) {
+        layer.bindPopup(`<b>${feature.properties.park_name}</b><br>Type: ${feature.properties.program_type}`);
+    }
+}).addTo(map);
+    </script>
+</body>
+</html>
