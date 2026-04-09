@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <div id="columnchart" style="width: 900px; height: 500px;"></div>
+<script>
+     google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['Date', 'Score', { role: 'style' }],
+          ['April 4th',     2, 'green'],
+          ['April 5th',      1, 'red'],
+          ['April 6th',    6, 'green'],
+          ['April 7th', 0, 'red'],
+          ['April 8th', 0, 'red']
+        ]);
+
+        var options = {
+  title: 'Phillies scores for the last 5 games\nGreen bars indicate wins, red bars indicate losses',
+  titleTextStyle: {
+    fontSize: 16
+  }
+};
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('columnchart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="columnchart" style="width: 1350px; height: 750px;"></div>
+  </body>
+</html>
