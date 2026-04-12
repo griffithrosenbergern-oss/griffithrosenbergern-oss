@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Commute to Temple</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Basic page layout -->
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+    #map { flex: 3; }
+    #story {
+      flex: 1;
+      padding: 1em;
+      overflow-y: auto;
+      background: #fafafa;
+      border-left: 2px solid #ddd;
+    }
+    h2 { margin-top: 0; }
+    button {
+      display: block;
+      margin: 1em 0;
+      width: 100%;
+      padding: 0.5em;
+      border: none;
+      background-color: #333;
+      color: white;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover { background-color: #555; }
+    img {
+      width: 220px;
+      height: auto;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+    .leaflet-popup-content {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="story">
+    <h2>My Commute to Temple</h2>
+    <p>How I get to campus</p>
+    <button onclick="goToScene(0)">Stop 1: 46th Street</button>
+    <button onclick="goToScene(1)">Stop 2: City Hall</button>
+    <button onclick="goToScene(2)">Stop 3: Cecil B. Moore</button>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Initialize the map
+    var map = L.map('map').setView([39.9556, -75.2202], 17);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
+}).addTo(map);
+
+L.marker([39.95568978165081, -75.2202658474019])
+  .addTo(map)
+  .bindPopup('Where I start my commute.');
+
+    // Define story scenes with coordinates, zoom, and image URLs
+    var scenes = [
+    {
+        coords: [39.9587, -75.2139],
+        zoom: 15,
+        text: "<b>46th St. Station</b> - My ever reliable El stop.",
+        image: '46th_st.jpg'
+    },
+        {
+        coords: [39.9525, -75.1646],
+        zoom: 15,
+        text: "<b>City Hall Station</b> — Pretty much the center of the universe, and where I get on the BSL.",
+        image: 'City_Hall_station.jpeg'
+    },
+    {
+        coords: [39.9786, -75.1578],
+        zoom: 15,
+        text: "Finally, <b>Cecil B. Moore</b> — the gateway to Temple University.",
+        image: 'Cecil_B_Moore_station_2018.jpg'
+    }
+];
+
+    // Function to move between scenes
+    function goToScene(i) {
+      var s = scenes[i];
+      map.flyTo(s.coords, s.zoom, { duration: 3 });
+
+      // Add popup with text and image
+      L.popup({ maxWidth: 250 })
+        .setLatLng(s.coords)
+        .setContent(`
+          <div>
+            ${s.text}<br>
+            <img src="${s.image}" alt="Scene image">
+          </div>
+        `)
+        .openOn(map);
+    }
+  </script>
+
+</body>
+</html>
