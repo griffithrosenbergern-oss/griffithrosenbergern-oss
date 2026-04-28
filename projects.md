@@ -26,3 +26,5 @@ Here are some of my favorite works:
 [Global Alcohol Consumption](https://griffithrosenbergern-oss.github.io/griffithrosenbergern-oss/Alcohol_Consumption_noah)
 
 [My Commute](https://griffithrosenbergern-oss.github.io/griffithrosenbergern-oss/my_commute/my_commute.html)
+
+[A Psychogeographic Map of West Philly](https://griffithrosenbergern-oss.github.io/griffithrosenbergern-oss/final_proj)
