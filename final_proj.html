@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Project</title>
+
+    <style>
+        body { margin: 0; background: #111; overflow: auto; padding: 40px; box-sizing: border-box; }
+        #container { position: relative; width: 1400px; height: 2000px; }
+        svg#arrows { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        .fragment { position: absolute; cursor: pointer; z-index: 10; }
+        .fragment img { display: block; }
+        .fragment:hover img { opacity: 0.85; }
+
+
+
+       .scattered-photo {
+    position: absolute;
+    cursor: pointer;
+    z-index: 1500;
+    transition: transform 0.2s;
+    box-shadow: 3px 3px 12px rgba(0,0,0,0.7);
+}
+.scattered-photo:hover { transform: scale(1.05) rotate(0deg) !important; z-index: 1600; }
+.scattered-photo img { display: block; width: 160px; height: auto; }
+
+.scattered-photo.focused {
+    z-index: 2001 !important;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) !important;
+    box-shadow: 0 0 40px rgba(0,0,0,0.9);
+}
+.scattered-photo.focused img {
+    width: auto;
+    max-width: 80vw;
+    max-height: 80vh;
+}
+
+        #focus-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1999;
+            background: rgba(0,0,0,0.6);
+        }
+        #focus-overlay.active { display: block; }
+
+        #panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 3000;
+            width: 280px;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-family: sans-serif;
+            color: #ddd;
+        }
+        #panel-toggle {
+            width: 100%;
+            background: #2a2a2a;
+            color: #ddd;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            padding: 10px 14px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95em;
+            letter-spacing: 0.05em;
+        }
+        #panel-toggle:hover { background: #333; }
+        #panel-body {
+            display: none;
+            padding: 14px;
+        }
+        #panel-body.open { display: block; }
+        #panel-body p { margin: 0 0 12px; font-size: 0.85em; line-height: 1.5; color: #aaa; }
+        #panel-body audio { width: 100%; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <svg id="arrows">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#e63946" />
+                </marker>
+            </defs>
+            <path id="a1" fill="none" stroke="#e63946" stroke-width="2" marker-end="url(#arrowhead)" />
+            <path id="a2" fill="none" stroke="#e63946" stroke-width="2" marker-end="url(#arrowhead)" />
+            <path id="a3" fill="none" stroke="#e63946" stroke-width="2" marker-end="url(#arrowhead)" />
+        </svg>
+
+        <div class="fragment" id="f1" style="top: 40px; left: 30px;">
+            <img src="fragments/fragment1png.png" width="500">
+        </div>
+        <div class="fragment" id="f2" style="top: 60px; left: 600px;">
+            <img src="fragments/fragment2png.png" width="400">
+        </div>
+        <div class="fragment" id="f3" style="top: 450px; left: 350px;">
+            <img src="fragments/fragment3png.png" width="280">
+        </div>
+    </div>
+
+    <div id="focus-overlay"></div>
+
+    <div id="panel">
+        <button id="panel-toggle">&#9776; About this Map</button>
+        <div id="panel-body">
+            <p>This map is created from a dérive that two friends and I took through part of West Philly. The fragmented map sections are blocks that we walked together. They are separated by the psychogeographic boundaries of the neighborhood.</p>
+            <p>Field Recording</p>
+            <audio controls>
+                <source src="Derive/042126_060922_MIX.mp3" type="audio/mp3">
+            </audio>
+        </div>
+    </div>
+
+
+    <script>
+        const photos = {
+            f1: [
+                'Derive/fragment1/IMG_0002.JPG',
+                'Derive/fragment1/IMG_9962.JPG',
+                'Derive/fragment1/IMG_9963.JPG',
+                'Derive/fragment1/IMG_9964.JPG',
+                'Derive/fragment1/IMG_9965.JPG',
+                'Derive/fragment1/IMG_9980.JPG',
+                'Derive/fragment1/IMG_9983.JPG',
+            ],
+            f2: [
+                'Derive/fragment2/IMG_9966.JPG',
+                'Derive/fragment2/IMG_9967.JPG',
+                'Derive/fragment2/IMG_9968.JPG',
+                'Derive/fragment2/IMG_9969.JPG',
+                'Derive/fragment2/IMG_9970.JPG',
+                'Derive/fragment2/IMG_9991.JPG',
+                'Derive/fragment2/IMG_9992.JPG',
+                'Derive/fragment2/IMG_9993.JPG',
+                'Derive/fragment2/IMG_9996.JPG',
+                'Derive/fragment2/IMG_9997.JPG',
+            ],
+            f3: [
+                'Derive/fragment3/IMG_9973.JPG',
+                'Derive/fragment3/IMG_9974.JPG',
+                'Derive/fragment3/IMG_9975.JPG',
+                'Derive/fragment3/IMG_9982.JPG',
+                'Derive/fragment3/IMG_9998.JPG',
+            ]
+        };
+
+        let focusedPhoto = null;
+        const overlay = document.getElementById('focus-overlay');
+
+        function clearPhotos() {
+            document.querySelectorAll('.scattered-photo').forEach(p => p.remove());
+            unfocusPhoto();
+        }
+
+        function unfocusPhoto() {
+            if (focusedPhoto) {
+                focusedPhoto.style.left = focusedPhoto.dataset.origLeft;
+                focusedPhoto.style.top = focusedPhoto.dataset.origTop;
+                focusedPhoto.style.transform = focusedPhoto.dataset.origTransform;
+                focusedPhoto.classList.remove('focused');
+                focusedPhoto = null;
+            }
+            overlay.classList.remove('active');
+        }
+
+        function scatterPhotos(fragmentId) {
+    clearPhotos();
+    const container = document.getElementById('container');
+    const photoW = 160;
+    const photoH = 120;
+    const maxX = 1400 - photoW - 40;
+    const maxY = 1000 - photoH - 40;
+
+    photos[fragmentId].forEach(src => {
+        const div = document.createElement('div');
+        div.className = 'scattered-photo';
+
+        const img = document.createElement('img');
+        img.src = src;
+        div.appendChild(img);
+
+        const x = 20 + Math.random() * maxX;
+        const y = 20 + Math.random() * maxY;
+        const rot = (Math.random() - 0.5) * 16;
+        div.style.left = `${x}px`;
+        div.style.top  = `${y}px`;
+        div.style.transform = `rotate(${rot}deg)`;
+
+        div.addEventListener('click', e => {
+            e.stopPropagation();
+            if (focusedPhoto === div) {
+                unfocusPhoto();
+            } else {
+                unfocusPhoto();
+                focusedPhoto = div;
+                div.dataset.origLeft = div.style.left;
+                div.dataset.origTop = div.style.top;
+                div.dataset.origTransform = div.style.transform;
+                div.style.left = '50%';
+                div.style.top = '50%';
+                div.style.transform = 'translate(-50%, -50%)';
+                div.classList.add('focused');
+                overlay.classList.add('active');
+            }
+        });
+
+        container.appendChild(div);
+    });
+}
+
+
+
+
+        // arrows
+        const anchors = [
+            { from: { el: 'f1', px: 0.11, py: 0.02 },
+              to:   { el: 'f2', px: 0.08, py: 0.92 },
+              arrow: 'a1', type: 's', lift: -150, spread: 100 },
+            { from: { el: 'f2', px: 0.91, py: 0.38 },
+              to:   { el: 'f3', px: 0.77, py: 0.19 },
+              arrow: 'a2', type: 'q', curve: -100 },
+            { from: { el: 'f3', px: 0.02, py: 0.80 },
+              to:   { el: 'f2', px: 0.54, py: 0.89 },
+              arrow: 'a3', type: 's', lift: -800, dropOffset: 80 },
+        ];
+
+        function anchorPoint(anchor) {
+            const el = document.getElementById(anchor.el);
+            const x = parseFloat(el.style.left) + el.offsetWidth  * anchor.px;
+            const y = parseFloat(el.style.top)  + el.offsetHeight * anchor.py;
+            return { x, y };
+        }
+
+        function drawArrows() {
+            anchors.forEach(a => {
+                const from = anchorPoint(a.from);
+                const to   = anchorPoint(a.to);
+                let d;
+                if (a.type === 's') {
+                    const drop = a.dropOffset || 0;
+                    const spread = a.spread || 0;
+                    d = `M ${from.x} ${from.y} C ${from.x - spread} ${from.y + a.lift + drop} ${to.x + spread} ${to.y - a.lift + drop} ${to.x} ${to.y}`;
+                } else {
+                    const mx = (from.x + to.x) / 2;
+                    const my = (from.y + to.y) / 2 + a.curve;
+                    d = `M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`;
+                }
+                document.getElementById(a.arrow).setAttribute('d', d);
+            });
+        }
+
+        const container = document.getElementById('container');
+
+        ['f1', 'f2', 'f3'].forEach(id => {
+            document.getElementById(id).addEventListener('click', e => {
+                e.stopPropagation();
+                scatterPhotos(id);
+            });
+        });
+
+        container.addEventListener('click', e => {
+            if (!e.target.closest('.scattered-photo') && !e.target.closest('.fragment')) {
+                clearPhotos();
+            }
+        });
+
+        overlay.addEventListener('click', unfocusPhoto);
+
+        document.getElementById('panel-toggle').addEventListener('click', () => {
+            document.getElementById('panel-body').classList.toggle('open');
+        });
+
+        window.addEventListener('load', drawArrows);
+    </script>
+</body>
+</html>
+
+
